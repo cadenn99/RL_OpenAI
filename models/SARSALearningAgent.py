@@ -27,21 +27,21 @@ class SARSALearningAgent(Agent):
         for _ in tqdm(range(self.iterations), ncols=100):
             state = self.env.reset()
             q_state = self._get_Q_state(state[0])
-            action = self._get_next_action(q_state)
+            action = self._get_next_action(self.Q[q_state[0], q_state[1]])
 
             done = False
             iteration_rewards = 0
             while not done:
                 next_state, reward, done, _, _ = self.env.step(action)
                 next_q_state = self._get_Q_state(next_state)
-                next_action = self._get_next_action(next_q_state)
+                next_action = self._get_next_action(
+                    self.Q[next_q_state[0], next_q_state[1]])
 
                 self.Q[q_state[0], q_state[1], action] = self.__calc_new_value(
                     reward, q_state, action, next_q_state, next_action)
 
                 iteration_rewards += reward
-                q_state = next_q_state
-                action = next_action
+                q_state, action = next_q_state, next_action
 
             self.rewards.append(iteration_rewards)
             self.epsilon = self.epsilon - 2 / self.iterations if self.epsilon > 0.01 else 0.01
