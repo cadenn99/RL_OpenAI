@@ -11,15 +11,16 @@ env.reset()
 
 def QLearning(env, learning, discount, epsilon, min_eps, episodes):
     # Determine size of discretized state space
-    num_states = (env.observation_space.high - env.observation_space.low) *\
-        np.array([10, 100])
+    num_states = (env.observation_space.high -
+                  env.observation_space.low) * np.array([10, 100])
     num_states = np.round(num_states, 0).astype(int) + 1
 
+    # print(env.action_space.n)
     # Initialize Q table
-    Q = np.random.uniform(low=-1, high=1,
+    Q = np.random.uniform(low=0, high=0,
                           size=(num_states[0], num_states[1],
                                 env.action_space.n))
-
+    # print(Q)
     # Initialize variables to track rewards
     reward_list = []
     ave_reward_list = []
@@ -87,7 +88,7 @@ def QLearning(env, learning, discount, epsilon, min_eps, episodes):
             reward_list = []
 
         if (i+1) % 100 == 0:
-            print('Episode {} Average Reward: {}'.format(i+1, ave_reward))
+            print('Episode {} Average Reward: {}'.format(i+1, tot_reward))
 
     env.close()
 
