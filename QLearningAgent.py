@@ -79,8 +79,8 @@ class QLearningAgent:
         """
         Method for playing according to a Q table without updating it
         """
-        # if not self.Q:
-        #     return
+        if self.Q == None:
+            return
 
         state = env.reset()
         q_state = self.__get_Q_state(state[0])
@@ -96,17 +96,29 @@ class QLearningAgent:
             q_state = next_q_state
 
     def __plot_rewards(self):
-        print(self.rewards)
+        """
+        Method for plotting the rewards over time
+        """
+        plt.plot(range(0, len(self.rewards)), self.rewards)
+        plt.xlabel('Episodes')
+        plt.ylabel('Average Reward')
+        plt.title('Average Reward vs Episodes')
+        plt.savefig('rewards2.jpg')
+        plt.close()
 
     def q_learning(self):
+        """
+        Method for training the model
+        """
         if not self.Q:
             self.Q = self.__create_q_table(20, 200, env.action_space.n)
 
-        for _ in tqdm(range(self.iterations)):
+        for _ in tqdm(range(self.iterations), ncols=100):
             state = env.reset()
             q_state = self.__get_Q_state(state[0])
             done = False
-            tot_reward, reward = 0, 0
+
+            iteration_rewards = 0
             while not done:
                 action = self.__get_next_action(self.Q[q_state[0]][q_state[1]])
                 next_state, reward, done, _, _ = env.step(action)
@@ -118,11 +130,14 @@ class QLearningAgent:
                     self.Q[q_state[0], q_state[1], action] = self.__calc_new_value(
                         reward, q_state, action, next_q_state)
 
-                tot_reward += reward
+                iteration_rewards += reward
                 q_state = next_q_state
 
-            self.rewards.append(tot_reward)
+            self.rewards.append(iteration_rewards)
             self.epsilon = self.epsilon - 2 / self.iterations if self.epsilon > 0.01 else 0.01
+        env.close()
+
+        self.__plot_rewards()
 
 
 if __name__ == '__main__':
@@ -131,7 +146,6 @@ if __name__ == '__main__':
     if env_type == 'T':
 
         env = gym.make('MountainCar-v0')
-        env.reset()
         agent = QLearningAgent(env, 0.2, 0.9, 0.8, 5000)
         agent.q_learning()
         agent.save('saved/q_learning.bson')
