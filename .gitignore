@@ -1,3 +1,5 @@
 /saved
 /images
 /__pycache__
+/models/__pycache__
+**/*.jpg

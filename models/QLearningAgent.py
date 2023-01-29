@@ -1,8 +1,4 @@
-import numpy as np
-import gym
-import matplotlib.pyplot as plt
 from tqdm import tqdm
-import pickle
 from models.Agent import Agent
 
 
@@ -15,7 +11,7 @@ class QLearningAgent(Agent):
         """
         Method for calculating the next Q value
         """
-        return self.Q[state[0], state[1], action] + self.alpha * (reward + self.gamma * self._get_max_value(next_state) - self.Q[state[0], state[1], action])
+        return self.Q[state[0], state[1], action] + self.alpha * (reward + self.gamma * self.Q[next_state[0], next_state[1], self._get_max_action(next_state)] - self.Q[state[0], state[1], action])
 
     def train(self):
         """
@@ -28,24 +24,25 @@ class QLearningAgent(Agent):
             state = self.env.reset()
             q_state = self._get_Q_state(state[0])
             done = False
-
+            trunc = False
             iteration_rewards = 0
-            while not done:
-                action = self._get_next_action(
-                    self.Q[q_state[0]][q_state[1]])
-                next_state, reward, done, _, _ = self.env.step(action)
+
+            while not done and not trunc:
+                action = self._get_next_action(q_state)
+                next_state, reward, done, trunc, _ = self.env.step(action)
                 next_q_state = self._get_Q_state(next_state)
 
-                if done and next_state[0] >= 0.5:
+                self.Q[q_state[0], q_state[1], action] = self.__calc_new_value(
+                    reward, q_state, action, next_q_state)
+
+                if done:
                     self.Q[q_state[0], q_state[1], action] = reward
-                else:
-                    self.Q[q_state[0], q_state[1], action] = self.__calc_new_value(
-                        reward, q_state, action, next_q_state)
 
                 iteration_rewards += reward
                 q_state = next_q_state
 
             self.rewards.append(iteration_rewards)
+
             self.epsilon = self.epsilon - 2 / self.iterations if self.epsilon > 0.01 else 0.01
         self.env.close()
 

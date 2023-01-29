@@ -8,11 +8,10 @@ def main():
     env_type = input("Type T for train and P for play: ")
 
     if env_type == 'T':
-
         env = gym.make('MountainCar-v0')
         env._max_episode_steps = 1000
-        agent = QLearningAgent(env, 0.2, 0.9, 0.8, 5000) if model.lower(
-        ) == 'q' else SARSALearningAgent(env, 0.2, 0.9, 1, 5000)
+        agent = QLearningAgent(env, 0.1, 0.9, 0.5, 5000) if model.lower(
+        ) == 'q' else SARSALearningAgent(env, 0.1, 0.9, 1, 5000)
         agent.train()
         file = 'data/sarsa_learning.bson' if model.lower() == 's' else 'data/q_learning.bson'
         agent.save(file)
